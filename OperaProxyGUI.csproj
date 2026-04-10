@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <!-- Windows Forms нужен для NotifyIcon (трей) -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>OperaProxyGUI</RootNamespace>
+    <AssemblyName>OperaProxyGUI</AssemblyName>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Deterministic>true</Deterministic>
+    <!-- Отключаем генерацию сателлитных сборок для локализаций WPF -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- RID для публикации single-file exe (restore/build/publish используют один RID) -->
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <!-- Иконка приложения -->
+    <ApplicationIcon>Resources\app.ico</ApplicationIcon>
+    <!-- Версия сборки -->
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <!--
+      Файлы ресурсов подключаем явно (app.ico — как EmbeddedResource для
+      GetManifestResourceStream в TrayIconService), поэтому отключаем
+      автоматическое подключение картинок как Resource.
+    -->
+    <EnableDefaultResourceItems>false</EnableDefaultResourceItems>
+  </PropertyGroup>
+
+  <!--
+    App.xaml, Views/*.xaml, Themes/*.xaml и все *.cs подключаются SDK
+    автоматически (Page / ApplicationDefinition / Compile).
+  -->
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\app.ico">
+      <LogicalName>OperaProxyGUI.Resources.app.ico</LogicalName>
+    </EmbeddedResource>
+    <Resource Include="Resources\app.png" />
+  </ItemGroup>
+
+  <!--
+    ══════════════════════════════════════════════════════════════════
+    EMBEDDED BINARY — положите бинарник opera-proxy.windows-amd64.exe
+    в папку Resources/ (секция ниже подхватит его автоматически):
+    ══════════════════════════════════════════════════════════════════
+  -->
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\opera-proxy.windows-amd64.exe" Condition="Exists('Resources\opera-proxy.windows-amd64.exe')">
+      <LogicalName>OperaProxyGUI.Resources.opera-proxy.windows-amd64.exe</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,74 @@
+name: Build OperaProxy GUI
+
+on:
+  push:
+  workflow_dispatch:
+
+
+env:
+  ANDROID_API_LEVEL: 34
+  ANDROID_BUILD_TOOLS_VERSION: "34.0.0"
+  GRADLE_VERSION: "8.2"
+  CARGO_PROFILE: release
+  CARGO_BUILD_TARGET: aarch64-linux-android
+  BUILD_TYPE: ${{ github.event.inputs.build_type || 'Release' }}
+  NO_DASHBOARD: "1"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore NuGet packages
+      run: dotnet restore OperaProxyGUI.csproj -r win-x64
+
+    - name: Build solution (Release)
+      run: dotnet build OperaProxyGUI.csproj -c Release -r win-x64 --no-restore
+
+    - name: Publish single-file exe
+      run: dotnet publish OperaProxyGUI.csproj -c Release -r win-x64 -p:PublishSingleFile=true -p:SelfContained=false -p:IncludeNativeLibrariesForSelfExtract=true --no-build -o publish
+
+    - name: List build outputs
+      shell: pwsh
+      run: |
+        Write-Host "Build outputs:"
+        Get-ChildItem -Path "publish" -Recurse | Format-Table Name, Length, FullName
+
+    # ── 16. Create/update git tag ──────────────────────────────────────────
+    - name: Create or update git tag
+      env:
+        TAG: v3
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        git config user.name  "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Удаляем старый тег с таким именем если он есть (force push)
+        git tag -d "$TAG"
+        git push origin ":refs/tags/$TAG"
+
+        # Создаём тег на текущем коммите
+        git tag "$TAG"
+        git push origin "$TAG"
+        echo "Тег $TAG создан/обновлён на $(git rev-parse HEAD)"
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+       tag_name: v3
+       name: v3
+       body: |
+         Built automatically on push.
+       files: publish/OperaProxyGUI.exe
+       make_latest: true

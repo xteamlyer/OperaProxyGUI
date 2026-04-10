@@ -1,0 +1,585 @@
+<Window x:Class="OperaProxyGUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Opera Proxy GUI"
+        Height="760" Width="900"
+        WindowStartupLocation="CenterScreen"
+        Style="{StaticResource DarkWindow}"
+        TextOptions.TextFormattingMode="Display"
+        UseLayoutRounding="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ── Шапка ─────────────────────────────────────────────────────── -->
+        <Grid Grid.Row="0" Background="{StaticResource HeaderBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Image Grid.Column="0" Source="/OperaProxyGUI;component/Resources/app.png"
+                   Width="133" Height="49" Margin="8" Stretch="Uniform" />
+            <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="Opera Proxy GUI" FontSize="22" FontWeight="Bold"
+                           Foreground="#DC3838" />
+                <TextBlock Text="Управление прокси opera-proxy" FontSize="13"
+                           Foreground="{StaticResource MutedTextBrush}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- ── Прокручиваемое содержимое ─────────────────────────────────── -->
+        <ScrollViewer Grid.Row="1" Margin="10">
+            <StackPanel>
+                <Expander Header="⚙  Основные параметры" IsExpanded="True" Style="{StaticResource DarkExpander}">
+                    <StackPanel Margin="10,8,10,10">
+                        <!-- Адрес прослушивания -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Адрес прослушивания" Style="{StaticResource RowLabel}"
+                                       ToolTip="Адрес и порт, на котором прокси принимает подключения. По умолчанию: 127.0.0.1:18080" />
+                            <TextBlock Grid.Column="1" Text="-bind-address" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Адрес и порт, на котором прокси принимает подключения. По умолчанию: 127.0.0.1:18080" />
+                            <TextBox Grid.Column="2" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.BindAddress, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Адрес и порт, на котором прокси принимает подключения. По умолчанию: 127.0.0.1:18080" />
+                        </Grid>
+                        <!-- Режим SOCKS -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Режим SOCKS" Style="{StaticResource RowLabel}"
+                                       ToolTip="Если включено — прокси принимает SOCKS-запросы вместо HTTP." />
+                            <TextBlock Grid.Column="1" Text="-socks-mode" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Если включено — прокси принимает SOCKS-запросы вместо HTTP." />
+                            <CheckBox Grid.Column="2" Content="Включён" Style="{StaticResource DarkCheckBox}"
+                                      IsChecked="{Binding Settings.SocksMode}"
+                                      ToolTip="Если включено — прокси принимает SOCKS-запросы вместо HTTP." />
+                        </Grid>
+                        <!-- Bootstrap DNS -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Bootstrap DNS" Style="{StaticResource RowLabel}"
+                                       ToolTip="Список DNS/DoH/DoT резолверов для начального обнаружения SurfEasy API. Поддерживаются: dns://, https://, tls://, tcp://. Запятая как разделитель." />
+                            <TextBlock Grid.Column="1" Text="-bootstrap-dns" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Список DNS/DoH/DoT резолверов для начального обнаружения SurfEasy API. Поддерживаются: dns://, https://, tls://, tcp://. Запятая как разделитель." />
+                            <TextBox Grid.Column="2" Style="{StaticResource DarkTextBox}" Height="58"
+                                     AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                                     Text="{Binding Settings.BootstrapDns, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Список DNS/DoH/DoT резолверов для начального обнаружения SurfEasy API. Поддерживаются: dns://, https://, tls://, tcp://. Запятая как разделитель." />
+                        </Grid>
+                        <!-- Страна / регион -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Страна / регион" Style="{StaticResource RowLabel}"
+                                       ToolTip="Желаемое местоположение прокси-сервера. EU — Европа, AS — Азия, AM — Америка." />
+                            <TextBlock Grid.Column="1" Text="-country" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Желаемое местоположение прокси-сервера. EU — Европа, AS — Азия, AM — Америка." />
+                            <ComboBox Grid.Column="2" Style="{StaticResource DarkComboBox}"
+                                      ItemContainerStyle="{StaticResource DarkComboBoxItem}"
+                                      ItemsSource="{Binding Countries}"
+                                      SelectedIndex="{Binding CountryIndex}"
+                                      ToolTip="Желаемое местоположение прокси-сервера. EU — Европа, AS — Азия, AM — Америка." />
+                        </Grid>
+                        <!-- Уровень логирования -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Уровень логирования" Style="{StaticResource RowLabel}"
+                                       ToolTip="Детальность логов: 10 — отладка, 20 — информация, 30 — предупреждения, 40 — ошибки, 50 — критические." />
+                            <TextBlock Grid.Column="1" Text="-verbosity" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Детальность логов: 10 — отладка, 20 — информация, 30 — предупреждения, 40 — ошибки, 50 — критические." />
+                            <Slider Grid.Column="2" Minimum="0" Maximum="100" TickFrequency="10" TickPlacement="BottomRight"
+                                    Value="{Binding Settings.Verbosity}"
+                                    ToolTip="Детальность логов: 10 — отладка, 20 — информация, 30 — предупреждения, 40 — ошибки, 50 — критические." />
+                        </Grid>
+                    </StackPanel>
+                </Expander>
+                <Expander Header="🔧  Дополнительные параметры" IsExpanded="False" Style="{StaticResource DarkExpander}">
+                    <StackPanel Margin="10,8,10,10">
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseApiUserAgent}" ToolTip="Включить параметр: -api-user-agent" />
+                            <TextBlock Grid.Column="1" Text="User-Agent для API" Style="{StaticResource RowLabel}"
+                                       ToolTip="User-Agent, сообщаемый SurfEasy API." />
+                            <TextBlock Grid.Column="2" Text="-api-user-agent" Style="{StaticResource ArgLabel}"
+                                       ToolTip="User-Agent, сообщаемый SurfEasy API." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.ApiUserAgent, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseApiUserAgent}"
+                                     ToolTip="User-Agent, сообщаемый SurfEasy API." />
+                        </Grid>
+                        <!-- ── Подставной SNI ──────────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseFakeSni}" ToolTip="Включить параметр: -fake-SNI" />
+                            <TextBlock Grid.Column="1" Text="Подставной SNI" Style="{StaticResource RowLabel}"
+                                       ToolTip="Доменное имя, используемое как SNI при соединении с серверами. Помогает обходить DPI." />
+                            <TextBlock Grid.Column="2" Text="-fake-SNI" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Доменное имя, используемое как SNI при соединении с серверами. Помогает обходить DPI." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.FakeSni, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseFakeSni}"
+                                     ToolTip="Доменное имя, используемое как SNI при соединении с серверами. Помогает обходить DPI." />
+                        </Grid>
+                        <!-- ── Попыток инициализации ───────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseInitRetries}" ToolTip="Включить параметр: -init-retries" />
+                            <TextBlock Grid.Column="1" Text="Попыток инициализации" Style="{StaticResource RowLabel}"
+                                       ToolTip="Количество попыток при инициализации. 0 — бесконечно." />
+                            <TextBlock Grid.Column="2" Text="-init-retries" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Количество попыток при инициализации. 0 — бесконечно." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.InitRetries, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseInitRetries}"
+                                     ToolTip="Количество попыток при инициализации. 0 — бесконечно." />
+                        </Grid>
+                        <!-- ── Интервал повтора ────────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseInitRetryInterval}" ToolTip="Включить параметр: -init-retry-interval" />
+                            <TextBlock Grid.Column="1" Text="Интервал повтора" Style="{StaticResource RowLabel}"
+                                       ToolTip="Задержка между попытками инициализации. Формат: 5s, 1m30s." />
+                            <TextBlock Grid.Column="2" Text="-init-retry-interval" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Задержка между попытками инициализации. Формат: 5s, 1m30s." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.InitRetryInterval, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseInitRetryInterval}"
+                                     ToolTip="Задержка между попытками инициализации. Формат: 5s, 1m30s." />
+                        </Grid>
+                        <!-- ── Выбор сервера ───────────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseServerSelection}" ToolTip="Включить параметр: -server-selection" />
+                            <TextBlock Grid.Column="1" Text="Выбор сервера" Style="{StaticResource RowLabel}"
+                                       ToolTip="Политика выбора сервера: first — первый, random — случайный, fastest — самый быстрый." />
+                            <TextBlock Grid.Column="2" Text="-server-selection" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Политика выбора сервера: first — первый, random — случайный, fastest — самый быстрый." />
+                            <ComboBox Grid.Column="3" Style="{StaticResource DarkComboBox}"
+                                      ItemContainerStyle="{StaticResource DarkComboBoxItem}"
+                                      ItemsSource="{Binding ServerSelections}"
+                                      SelectedIndex="{Binding ServerSelectionIndex}"
+                                      IsEnabled="{Binding Settings.UseServerSelection}"
+                                      ToolTip="Политика выбора сервера: first — первый, random — случайный, fastest — самый быстрый." />
+                        </Grid>
+                        <!-- ── Лимит загрузки ──────────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseServerSelectionDlLimit}" ToolTip="Включить параметр: -server-selection-dl-limit" />
+                            <TextBlock Grid.Column="1" Text="Лимит загрузки (байт)" Style="{StaticResource RowLabel}"
+                                       ToolTip="Ограничение объёма данных на соединение при выборе fastest." />
+                            <TextBlock Grid.Column="2" Text="-server-selection-dl-limit" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Ограничение объёма данных на соединение при выборе fastest." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.ServerSelectionDlLimit, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseServerSelectionDlLimit}"
+                                     ToolTip="Ограничение объёма данных на соединение при выборе fastest." />
+                        </Grid>
+                        <!-- ── Таймаут выбора сервера ──────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseServerSelectionTimeout}" ToolTip="Включить параметр: -server-selection-timeout" />
+                            <TextBlock Grid.Column="1" Text="Таймаут выбора сервера" Style="{StaticResource RowLabel}"
+                                       ToolTip="Время, отведённое функции выбора сервера. Формат: 30s, 1m." />
+                            <TextBlock Grid.Column="2" Text="-server-selection-timeout" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Время, отведённое функции выбора сервера. Формат: 30s, 1m." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.ServerSelectionTimeout, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseServerSelectionTimeout}"
+                                     ToolTip="Время, отведённое функции выбора сервера. Формат: 30s, 1m." />
+                        </Grid>
+                        <!-- ── URL теста сервера ───────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseServerSelectionTestUrl}" ToolTip="Включить параметр: -server-selection-test-url" />
+                            <TextBlock Grid.Column="1" Text="URL теста сервера" Style="{StaticResource RowLabel}"
+                                       ToolTip="URL для замера скорости при политике fastest." />
+                            <TextBlock Grid.Column="2" Text="-server-selection-test-url" Style="{StaticResource ArgLabel}"
+                                       ToolTip="URL для замера скорости при политике fastest." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.ServerSelectionTestUrl, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseServerSelectionTestUrl}"
+                                     ToolTip="URL для замера скорости при политике fastest." />
+                        </Grid>
+                        <!-- ── IP-адрес API ────────────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseApiAddress}" ToolTip="Включить параметр: -api-address" />
+                            <TextBlock Grid.Column="1" Text="IP-адрес API" Style="{StaticResource RowLabel}"
+                                       ToolTip="Переопределяет IP-адрес api2.sec-tunnel.com." />
+                            <TextBlock Grid.Column="2" Text="-api-address" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Переопределяет IP-адрес api2.sec-tunnel.com." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.ApiAddress, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseApiAddress}"
+                                     ToolTip="Переопределяет IP-адрес api2.sec-tunnel.com." />
+                        </Grid>
+                        <!-- ── Тип клиента API ─────────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseApiClientType}" ToolTip="Включить параметр: -api-client-type" />
+                            <TextBlock Grid.Column="1" Text="Тип клиента API" Style="{StaticResource RowLabel}"
+                                       ToolTip="Тип клиента, сообщаемый SurfEasy API." />
+                            <TextBlock Grid.Column="2" Text="-api-client-type" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Тип клиента, сообщаемый SurfEasy API." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.ApiClientType, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseApiClientType}"
+                                     ToolTip="Тип клиента, сообщаемый SurfEasy API." />
+                        </Grid>
+                        <!-- ── Версия клиента API ──────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseApiClientVersion}" ToolTip="Включить параметр: -api-client-version" />
+                            <TextBlock Grid.Column="1" Text="Версия клиента API" Style="{StaticResource RowLabel}"
+                                       ToolTip="Версия клиента, сообщаемая SurfEasy API." />
+                            <TextBlock Grid.Column="2" Text="-api-client-version" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Версия клиента, сообщаемая SurfEasy API." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.ApiClientVersion, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseApiClientVersion}"
+                                     ToolTip="Версия клиента, сообщаемая SurfEasy API." />
+                        </Grid>
+                        <!-- ── Логин API ───────────────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseApiLogin}" ToolTip="Включить параметр: -api-login" />
+                            <TextBlock Grid.Column="1" Text="Логин API" Style="{StaticResource RowLabel}"
+                                       ToolTip="Логин для SurfEasy API." />
+                            <TextBlock Grid.Column="2" Text="-api-login" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Логин для SurfEasy API." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.ApiLogin, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseApiLogin}"
+                                     ToolTip="Логин для SurfEasy API." />
+                        </Grid>
+                        <!-- ── Пароль API ──────────────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseApiPassword}" ToolTip="Включить параметр: -api-password" />
+                            <TextBlock Grid.Column="1" Text="Пароль API" Style="{StaticResource RowLabel}"
+                                       ToolTip="Пароль для SurfEasy API." />
+                            <TextBlock Grid.Column="2" Text="-api-password" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Пароль для SurfEasy API." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.ApiPassword, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseApiPassword}"
+                                     ToolTip="Пароль для SurfEasy API." />
+                        </Grid>
+                        <!-- ── Прокси для API ──────────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseApiProxy}" ToolTip="Включить параметр: -api-proxy" />
+                            <TextBlock Grid.Column="1" Text="Прокси для API" Style="{StaticResource RowLabel}"
+                                       ToolTip="Дополнительный прокси для доступа к SurfEasy API." />
+                            <TextBlock Grid.Column="2" Text="-api-proxy" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Дополнительный прокси для доступа к SurfEasy API." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.ApiProxy, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseApiProxy}"
+                                     ToolTip="Дополнительный прокси для доступа к SurfEasy API." />
+                        </Grid>
+                        <!-- ── CA-сертификат ───────────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseCafile}" ToolTip="Включить параметр: -cafile" />
+                            <TextBlock Grid.Column="1" Text="CA-сертификат" Style="{StaticResource RowLabel}"
+                                       ToolTip="Путь к пользовательскому файлу CA-сертификата." />
+                            <TextBlock Grid.Column="2" Text="-cafile" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Путь к пользовательскому файлу CA-сертификата." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.Cafile, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseCafile}"
+                                     ToolTip="Путь к пользовательскому файлу CA-сертификата." />
+                        </Grid>
+                        <!-- ── Базовый прокси ──────────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseProxy}" ToolTip="Включить параметр: -proxy" />
+                            <TextBlock Grid.Column="1" Text="Базовый прокси" Style="{StaticResource RowLabel}"
+                                       ToolTip="Базовый прокси для всех исходящих соединений. Формат: socks5://host:port." />
+                            <TextBlock Grid.Column="2" Text="-proxy" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Базовый прокси для всех исходящих соединений. Формат: socks5://host:port." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.Proxy, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseProxy}"
+                                     ToolTip="Базовый прокси для всех исходящих соединений. Формат: socks5://host:port." />
+                        </Grid>
+                        <!-- ── Фиксированный адрес прокси ──────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseOverrideProxyAddress}" ToolTip="Включить параметр: -override-proxy-address" />
+                            <TextBlock Grid.Column="1" Text="Фиксированный адрес прокси" Style="{StaticResource RowLabel}"
+                                       ToolTip="Использовать фиксированный адрес вместо адреса от SurfEasy API." />
+                            <TextBlock Grid.Column="2" Text="-override-proxy-address" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Использовать фиксированный адрес вместо адреса от SurfEasy API." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.OverrideProxyAddress, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseOverrideProxyAddress}"
+                                     ToolTip="Использовать фиксированный адрес вместо адреса от SurfEasy API." />
+                        </Grid>
+                        <!-- ── Таймаут сети ────────────────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseTimeout}" ToolTip="Включить параметр: -timeout" />
+                            <TextBlock Grid.Column="1" Text="Таймаут сети" Style="{StaticResource RowLabel}"
+                                       ToolTip="Общий таймаут сетевых операций. Формат: 10s, 1m." />
+                            <TextBlock Grid.Column="2" Text="-timeout" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Общий таймаут сетевых операций. Формат: 10s, 1m." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.Timeout, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseTimeout}"
+                                     ToolTip="Общий таймаут сетевых операций. Формат: 10s, 1m." />
+                        </Grid>
+                        <!-- ── Интервал обновления логина ──────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseRefresh}" ToolTip="Включить параметр: -refresh" />
+                            <TextBlock Grid.Column="1" Text="Интервал обновления логина" Style="{StaticResource RowLabel}"
+                                       ToolTip="Интервал обновления авторизации." />
+                            <TextBlock Grid.Column="2" Text="-refresh" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Интервал обновления авторизации." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.Refresh, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseRefresh}"
+                                     ToolTip="Интервал обновления авторизации." />
+                        </Grid>
+                        <!-- ── Повтор обновления логина ────────────────────── -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="176" />
+                                <ColumnDefinition Width="180" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" Style="{StaticResource DarkCheckBox}" HorizontalAlignment="Left"
+                                      IsChecked="{Binding Settings.UseRefreshRetry}" ToolTip="Включить параметр: -refresh-retry" />
+                            <TextBlock Grid.Column="1" Text="Повтор обновления логина" Style="{StaticResource RowLabel}"
+                                       ToolTip="Интервал повтора при ошибке обновления авторизации." />
+                            <TextBlock Grid.Column="2" Text="-refresh-retry" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Интервал повтора при ошибке обновления авторизации." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding Settings.RefreshRetry, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding Settings.UseRefreshRetry}"
+                                     ToolTip="Интервал повтора при ошибке обновления авторизации." />
+                        </Grid>
+                    </StackPanel>
+                </Expander>
+
+                <!-- ══ Авто-подбор api-proxy ══════════════════════════════════ -->
+                <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1" CornerRadius="4" Margin="0,8" Padding="10">
+                    <StackPanel>
+                        <TextBlock Text="Авто-подбор прокси для -api-proxy" FontWeight="SemiBold"
+                                   Foreground="#B4C8FF" Margin="0,0,0,6" />
+                        <CheckBox Content="Скачивать список прокси и выбирать рабочий"
+                                  Style="{StaticResource DarkCheckBox}"
+                                  IsChecked="{Binding UseProxyList}"
+                                  ToolTip="Если включено — перед запуском прокси скачивается текстовый файл со списком прокси, проверяется подключение, и первый рабочий используется как -api-proxy." />
+                        <Grid Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="URL списка:" Style="{StaticResource RowLabel}"
+                                       ToolTip="URL текстового файла со списком прокси (одна строка — один прокси)." />
+                            <TextBox Grid.Column="1" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding ProxyListUrl, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="URL текстового файла со списком прокси. Поддерживаются строки вида socks4://host:port, socks5://host:port, http(s)://host:port." />
+                            <Button Grid.Column="2" Content="Проверить" Style="{StaticResource DarkButton}" Margin="8,0,0,0"
+                                    Command="{Binding TestProxyCommand}"
+                                    ToolTip="Скачать список и проверить прокси на подключение." />
+                        </Grid>
+                        <Grid Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Таймаут (мс):" Style="{StaticResource RowLabel}"
+                                       ToolTip="Таймаут проверки одного прокси в миллисекундах." />
+                            <TextBox Grid.Column="1" Style="{StaticResource DarkTextBox}"
+                                     Text="{Binding ProxyTestTimeoutMs, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Таймаут проверки одного прокси в миллисекундах." />
+                            <TextBlock Grid.Column="2" Text="Потоков:" Style="{StaticResource RowLabel}" TextAlignment="Right"
+                                       ToolTip="Количество одновременных проверок прокси." />
+                            <TextBox Grid.Column="3" Style="{StaticResource DarkTextBox}" Width="70" HorizontalAlignment="Left"
+                                     Text="{Binding ProxyTestConcurrency, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Количество одновременных проверок прокси." />
+                        </Grid>
+                        <TextBlock Text="{Binding ProxyProgress}" Style="{StaticResource MutedLabel}" Margin="0,6,0,0"
+                                   ToolTip="Прогресс проверки прокси." />
+                        <Grid Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Выбранный прокси:" Style="{StaticResource RowLabel}"
+                                       ToolTip="Прокси, который будет передан как -api-proxy." />
+                            <TextBlock Grid.Column="1" Text="{Binding SelectedProxy}" Style="{StaticResource ArgLabel}"
+                                       ToolTip="Прокси, который будет передан как -api-proxy." />
+                        </Grid>
+                        <TextBlock Text="{Binding ProxyStatus}" Style="{StaticResource MutedLabel}" Margin="0,4,0,0"
+                                   ToolTip="Статус подбора прокси." />
+                    </StackPanel>
+                </Border>
+
+                <!-- ══ Кнопка запуска + статус ════════════════════════════════ -->
+                <Grid Margin="0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="{Binding ToggleText}" Style="{StaticResource DarkButton}"
+                            Command="{Binding ToggleProxyCommand}" Margin="0,0,10,0" />
+                    <TextBlock Grid.Column="1" Text="{Binding StatusText}" VerticalAlignment="Center"
+                               FontWeight="SemiBold" />
+                </Grid>
+
+                <!-- ══ Лог ════════════════════════════════════════════════════ -->
+                <Expander Header="📋  Лог вывода" IsExpanded="True" Style="{StaticResource DarkExpander}">
+                    <ListBox Style="{StaticResource DarkListBox}"
+                             ItemsSource="{Binding Log}"
+                             FontFamily="Consolas" FontSize="12"
+                             MinHeight="180" MaxHeight="260" />
+                </Expander>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

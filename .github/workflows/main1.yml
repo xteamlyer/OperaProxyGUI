@@ -1,0 +1,100 @@
+name: Update Full CA Bundle with Metadata
+
+on:
+  workflow_dispatch:           # Только ручной запуск
+
+jobs:
+  build-ca-bundle:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@main
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y perl libwww-perl openssl curl
+      - name: Download mk-ca-bundle.pl
+        run: |
+          curl -L -o mk-ca-bundle.pl https://raw.githubusercontent.com/curl/curl/master/scripts/mk-ca-bundle.pl
+          chmod +x mk-ca-bundle.pl
+      - name: Generate full ca-bundle
+        continue-on-error: true
+        run: |
+          perl mk-ca-bundle.pl -k -v -p ALL:ALL ca.bundle.crt
+      - name: Generate full ca-bundle with metadata
+        continue-on-error: true
+        run: |
+          perl mk-ca-bundle.pl -k -v -m -p ALL:ALL ca.bundle.crt.WithM
+      - name: Generate full ca-bundle with include plain text listing of certificates
+        continue-on-error: true
+        run: |
+          perl mk-ca-bundle.pl -k -v -t -p ALL:ALL ca.bundle.crt.WithT
+      - name: Generate full ca-bundle with
+        continue-on-error: true
+        run: |
+          perl mk-ca-bundle.pl -k -v -d aurora -p ALL:ALL ca.bundle.crt.aurora
+      - name: Generate full ca-bundle with
+        continue-on-error: true
+        run: |
+          perl mk-ca-bundle.pl -k -v -d beta -p ALL:ALL ca.bundle.crt.beta
+      - name: Generate full ca-bundle with
+        continue-on-error: true
+        run: |
+          perl mk-ca-bundle.pl -k -v -d central -p ALL:ALL ca.bundle.crt.central
+      - name: Generate full ca-bundle with
+        continue-on-error: true
+        run: |
+          perl mk-ca-bundle.pl -k -v -d Mozilla -p ALL:ALL ca.bundle.crt.Mozilla
+      - name: Generate full ca-bundle with
+        continue-on-error: true
+        run: |
+          perl mk-ca-bundle.pl -k -v -d nss -p ALL:ALL ca.bundle.crt.nss
+      - name: Upload CA bundle
+        continue-on-error: true
+        uses: actions/upload-artifact@main
+        with:
+          path: ca.bundle.crt
+          archive: false
+      - name: Upload CA bundle
+        continue-on-error: true
+        uses: actions/upload-artifact@main
+        with:
+          path: ca.bundle.crt.WithM
+          archive: false
+      - name: Upload CA bundle
+        continue-on-error: true
+        uses: actions/upload-artifact@main
+        with:
+          path: ca.bundle.crt.WithT
+          archive: false
+      - name: Upload CA bundle
+        continue-on-error: true
+        uses: actions/upload-artifact@main
+        with:
+          path: ca.bundle.crt.aurora
+          archive: false
+      - name: Upload CA bundle
+        continue-on-error: true
+        uses: actions/upload-artifact@main
+        with:
+          path: ca.bundle.crt.beta
+          archive: false
+      - name: Upload CA bundle
+        continue-on-error: true
+        uses: actions/upload-artifact@main
+        with:
+          path: ca.bundle.crt.central
+          archive: false
+      - name: Upload CA bundle
+        continue-on-error: true
+        uses: actions/upload-artifact@main
+        with:
+          path: ca.bundle.crt.Mozilla
+          archive: false
+      - name: Upload CA bundle
+        continue-on-error: true
+        uses: actions/upload-artifact@main
+        with:
+          path: ca.bundle.crt.nss
+          archive: false
